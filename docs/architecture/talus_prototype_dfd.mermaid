@@ -1,0 +1,91 @@
+flowchart LR
+
+    classDef external  fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f,font-weight:bold
+    classDef goservice fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef cudabin   fill:#ede9fe,stroke:#7c3aed,color:#3b0764,font-weight:bold
+    classDef store     fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+    %%──────────────────────────────────────────────────────────────────
+    %% EXTERNAL ENTITIES
+    %%──────────────────────────────────────────────────────────────────
+    USGS(["USGS 3DEP\nGeoTIFF DEM"]):::external
+    NGMDB(["USGS NGMDB\nGeology Polygons"]):::external
+    NOAA(["NOAA NOMADS\nHRRR Filter API"]):::external
+    CLIENT(["Browser /\nMobile Client"]):::external
+    HOOKS(["Alert Webhook\nSubscribers"]):::external
+
+    %%──────────────────────────────────────────────────────────────────
+    %% SERVICES (Go)
+    %%──────────────────────────────────────────────────────────────────
+    S1["S1 · DEM Ingestion\n─────────────────────\nGo\n─────────────────────\ngdalinfo GeoTIFF parse\nGPX XML decode\nGeology polygon ingest\nCalls S2 via REST on completion"]:::goservice
+
+    S2["S2 · GPU Terrain Preprocessing\n─────────────────────\nGo\n─────────────────────\nOrchestrates CUDA subprocess\nFile I/O to shared volume\nApplies source zone thresholds\nWrites all derivatives to DB"]:::goservice
+
+    S4["S4 · Hazard Analysis & Alerts\n─────────────────────\nGo\n─────────────────────\nST_DWithin proximity query\nAspect → sun exposure time\nProximity-based risk scoring\nrisk = proximity × slope × freeze_thaw\nWebhook dispatch on threshold"]:::goservice
+
+    S5["S5 · API Gateway & Dashboard\n─────────────────────\nGo · Leaflet.js · Vanilla JS\n─────────────────────\nREST only — no WebSocket\nDEM hillshade tile layer\nSource zone GeoJSON overlay\nFreeze-thaw risk panel\nGPU benchmark table"]:::goservice
+
+    %%──────────────────────────────────────────────────────────────────
+    %% CUDA SUBPROCESS (file-based IPC — not CGo)
+    %%──────────────────────────────────────────────────────────────────
+    CUDA{{"CUDA Terrain Binary\n─────────────────────\nStandalone C / CUDA\n─────────────────────\nSobel slope & aspect kernel\nCurvature kernel\nTRI kernel\nRecords GPU + CPU timing"}}:::cudabin
+
+    %%──────────────────────────────────────────────────────────────────
+    %% POSTGRESQL + POSTGIS — PROTOTYPE SCHEMA
+    %% (simulation_runs, simulation_metrics, trajectory_results,
+    %%  hazard_corridors are ALL omitted — added back in full project)
+    %%──────────────────────────────────────────────────────────────────
+    subgraph PG["PostgreSQL + PostGIS  ·  Prototype Schema"]
+        direction TB
+        DB_T[("Terrain Store\n─────────\ndem_tiles\ngeology\nroutes")]:::store
+        DB_D[("Derivative Store\n─────────\nterrain_derivatives\nsource_zones\nterrain_metrics")]:::store
+        DB_A[("Analysis Store\n─────────\nroute_risk_assessments\n— proximity-based —\nfreeze_thaw_windows\nalert_events\nalert_configs")]:::store
+    end
+
+    %%──────────────────────────────────────────────────────────────────
+    %% DATA FLOWS — EXTERNAL INPUTS → S1
+    %%──────────────────────────────────────────────────────────────────
+    USGS  -->|"GeoTIFF raster file"| S1
+    NGMDB -->|"Rock type polygon data"| S1
+
+    %%──────────────────────────────────────────────────────────────────
+    %% DATA FLOWS — SERVICE 1
+    %%──────────────────────────────────────────────────────────────────
+    S1 -->|"W: tile metadata & file path\ngeology polygons"| DB_T
+    S1 -->|"REST POST: tile path & metadata\n(triggers preprocessing)"| S2
+
+    %%──────────────────────────────────────────────────────────────────
+    %% DATA FLOWS — SERVICE 2 ↔ CUDA SUBPROCESS
+    %% File-based IPC via shared Docker volume — no CGo, no network
+    %%──────────────────────────────────────────────────────────────────
+    DB_T  -->|"R: tile file path & geology IDs"| S2
+    S2    -->|"float32 DEM tile\n(binary file on shared volume)"| CUDA
+    CUDA  -->|"slope · aspect · curvature · TRI rasters\n+ GPU/CPU timing (stdout)"| S2
+    S2    -->|"W: derivative raster paths\nsource zone polygons\nGPU + CPU kernel timings"| DB_D
+
+    %%──────────────────────────────────────────────────────────────────
+    %% DATA FLOWS — SERVICE 5 (pipeline triggers + dashboard reads)
+    %%──────────────────────────────────────────────────────────────────
+    CLIENT -->|"POST /dem\nPOST /routes (GPX upload)\nPOST /analyze\nPOST /alerts/config\nGET /routes/{id}/risk\nGET /terrain/metrics\nGET /freeze-thaw · GET /alerts"| S5
+
+    S5 -->|"REST POST /dem\n(triggers ingestion)"| S1
+    S5 -->|"W: route LineString"| DB_T
+    S5 -->|"REST POST /analyze\n(triggers analysis)"| S4
+
+    DB_T  -->|"R: terrain & routes"| S5
+    DB_D  -->|"R: source zones & GPU metrics"| S5
+    DB_A  -->|"R: risk assessments & alert history"| S5
+    S5    -->|"W: alert configs"| DB_A
+
+    S5 -->|"Source zone overlay · route overlay\nProximity risk panel\nFreeze-thaw timeline (3-day)\nGPU benchmark table"| CLIENT
+
+    %%──────────────────────────────────────────────────────────────────
+    %% DATA FLOWS — SERVICE 4
+    %%──────────────────────────────────────────────────────────────────
+    NOAA  -->|"HTTP GET: TMP field at elevation\n+ bounding box (GRIB filter)"| S4
+    DB_D  -->|"R: ST_DWithin — source zone\ncentroids uphill of route"| S4
+    DB_T  -->|"R: route geometries"| S4
+    DB_A  -->|"R: alert threshold configs"| S4
+
+    S4 -->|"W: proximity risk scores\n(nearest_source_m · risk_score)\nfreeze_thaw_windows by aspect\nalert_events"| DB_A
+    S4 -->|"HTTP POST alert payload"| HOOKS
