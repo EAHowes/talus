@@ -1,0 +1,57 @@
+# ── Secrets & Environment ────────────────────────────────────────────
+.env
+*.pem
+*.key
+*.crt
+*.p12
+
+# ── Go ───────────────────────────────────────────────────────────────
+# Compiled binaries
+bin/
+dist/
+
+# Test cache and coverage output
+*.test
+*.out
+coverage.html
+
+# ── CUDA ─────────────────────────────────────────────────────────────
+# Compiled CUDA/C binaries and object files
+cuda/terrain/build/
+*.o
+*.so
+*.a
+cuda/terrain/terrain
+
+# ── Database ─────────────────────────────────────────────────────────
+# Local postgres data volume if you ever run postgres directly
+postgres-data/
+
+# ── DEM and Raster Data ──────────────────────────────────────────────
+# GeoTIFF files can be hundreds of MB — fetch from USGS, never commit
+*.tif
+*.tiff
+*.geotiff
+
+# Raster output from CUDA binary
+*.bin
+
+# GPX files with personal route data
+*.gpx
+
+# ── Docker ───────────────────────────────────────────────────────────
+# Docker override files often contain local machine specifics
+docker-compose.override.yml
+
+# ── Editor & OS ──────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db
+
+# ── Scripts ──────────────────────────────────────────────────────────
+# Downloaded data sits in scripts/ during processing — never commit raw data
+scripts/data/
