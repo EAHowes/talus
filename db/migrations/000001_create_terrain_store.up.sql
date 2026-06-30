@@ -2,6 +2,8 @@
 -- Creates the tables Service 1 (DEM Ingestion) writes to.
 -- Requires the PostGIS extension to be enabled on this database.
 
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 CREATE TABLE dem_tiles (
     id              SERIAL PRIMARY KEY,
     filename        TEXT NOT NULL,
