@@ -18,6 +18,12 @@ slope = atan(sqrt(gx² + gy²) / cell_size) × (180 / π)
 aspect = atan2(gy, -gx) × (180 / π)
 ```
 
-> Slope is in degrees and Aspect is in compass bearing (0 = North)
+> Slope is in degrees and Aspect is in compass bearing
 
+Due to atan2's domain being from -π to π, it must be rotated by subtracting from π/2 so that north is at 0 degrees. Thus:
 
+```
+aspect = 90 - atan2(gy, -gx) × (180 / π)
+```
+
+Finally, to deal with the negative angles add 360 to all negatives to shift back into the positive range.
