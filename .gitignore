@@ -55,3 +55,4 @@ Thumbs.db
 # ── Scripts ──────────────────────────────────────────────────────────
 # Downloaded data sits in scripts/ during processing — never commit raw data
 scripts/data/
+dem/
