@@ -1,3 +1,5 @@
+![Foster Falls Hillshare from Digital Elevation Model](docs/assets/foster_falls_hillshade.png)
+
 # Rockfall Hazard Analysis Platform
 
 A distributed system for quantitative pre-trip rockfall hazard assessment on climbing routes. Talus delivers an end-to-end pipeline from raw DEM ingestion to route risk visualization. Freeze-thaw risk windows combined with GPU-identified source zones above a route create actionable information for mitigating rockfall hazards.
