@@ -1,4 +1,5 @@
 ![Foster Falls Hillshare from Digital Elevation Model](docs/assets/foster_falls_hillshade.png)
+> Foster Falls Hillshade from Digital Elevation Model
 
 # Rockfall Hazard Analysis Platform
 
