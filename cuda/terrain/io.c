@@ -28,6 +28,7 @@ RasterData ReadDEM(const char *path) {
     size_t elements_read = fread(buffer, sizeof(float), count, file);
     if (elements_read != count) {
 	free(buffer);
+	fclose(file);
 	return empty;
     }
 
@@ -38,5 +39,26 @@ RasterData ReadDEM(const char *path) {
 }
 
 // write float 32 arr to disk
-void WriteDEM(const float *data, size_t count, const char *outpath);
+void WriteDEM(const float *data, size_t count, const char *outpath) {
 
+    FILE *file = fopen(outpath, "wb");
+    if (file == NULL) {
+	perror("Error opening file");
+	return;
+    }
+
+    size_t elements_written = fwrite(data, sizeof(float), count, file);
+    if (elements_written != count) {
+	perror("Error writing to file");
+	fclose(file);
+	return;
+    }
+
+    fclose(file);
+}
+
+void FreeRasterData(RasterData *raster) {
+    free(raster->data);
+    raster->data = NULL;
+    raster->valuesRead = 0;
+}
