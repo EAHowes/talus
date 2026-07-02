@@ -44,7 +44,7 @@ void slope_aspect_cpu(const float *dem, float *slope, float *aspect, int rows, i
                 float asp = 90.0f - atan2f(gy, -gx) * (180.0f / M_PI);
                 if (asp < 0.0f) asp += 360.0f;
                 aspect[row * cols + col] = asp;
-	   }
+	    }
 	}
     }
 }
