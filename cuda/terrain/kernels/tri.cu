@@ -35,3 +35,33 @@ void tri_cpu(const float *dem, float *tri, int rows, int cols) {
 	}
     }
 }
+
+__global__ void tri_kernel(const float *dem, float *tri, int rows, int cols) {
+
+    // thread index calculation
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // check if thread is in bounds
+    if (row >= rows || col >= cols) return;
+
+    // set boarder rows to inf since the filter wont have weights
+    if (row == 0 || row == rows - 1 || col == 0 || col == cols - 1) {
+	tri[row * cols + col] = -9999;
+	return;
+    }   
+
+    float a = dem[(row-1) * cols + (col-1)];
+    float b = dem[(row-1) * cols + col];
+    float c = dem[(row-1) * cols + (col+1)];
+    float d = dem[row * cols + (col-1)];
+    float e = dem[row * cols + col];
+    float f = dem[row * cols + (col+1)];
+    float g = dem[(row+1) * cols + (col-1)];
+    float h = dem[(row+1) * cols + col];
+    float i = dem[(row+1) * cols + (col+1)];
+
+    tri[row * cols + col] = (fabsf(e-a) + fabsf(e-b) + fabsf(e-c) + fabsf(e-d) + fabsf(e-f) + fabsf(e-g) + fabsf(e-h) + fabsf(e-i)) / 8.0f;
+}
+
+
