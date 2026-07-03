@@ -65,3 +65,27 @@ __global__ void tri_kernel(const float *dem, float *tri, int rows, int cols) {
 }
 
 
+void run_tri(const float *dem, float *tri, int rows, int cols) {
+    float *d_dem;
+    float *d_tri;
+
+    size_t count = rows * cols;
+
+    // create buffers and copy data to GPU
+    cudaMalloc((void**)&d_dem, count * sizeof(float));
+    cudaMemcpy(d_dem, dem, count * sizeof(float), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&d_tri, count * sizeof(float));
+    
+    dim3 block (16,16);
+    dim3 grid((cols + 15) / 16, (rows + 15) / 16);
+
+    tri_kernel<<<grid, block>>>(d_dem, d_tri, rows, cols);
+    cudaDeviceSynchronize();
+
+    // copy data back to cpu from GPU
+    cudaMemcpy(tri, d_tri, count * sizeof(float), cudaMemcpyDeviceToHost);
+
+    cudaFree(d_dem);
+    cudaFree(d_tri);
+}
