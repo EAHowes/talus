@@ -65,3 +65,33 @@ __global__ void curvature_kernel(const float *dem, float *plan, float *profile, 
     plan[row * cols + col] = -2 * (d + f - 2*e) / (cell_size * cell_size);
     profile[row * cols + col] = -2 * (b + h - 2*e) / (cell_size * cell_size);
 }
+
+void run_curvature(const float *dem, float *plan, float *profile, int rows, int cols, float cell_size) {
+    float *d_dem;
+    float *d_plan;
+    float *d_profile;
+
+    size_t count = rows * cols;
+
+    // create buffers and copy data to GPU
+    cudaMalloc((void**)&d_dem, count * sizeof(float));
+    cudaMemcpy(d_dem, dem, count * sizeof(float), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&d_plan, count * sizeof(float));
+
+    cudaMalloc((void**)&d_profile, count * sizeof(float));
+    
+    dim3 block (16,16);
+    dim3 grid((cols + 15) / 16, (rows + 15) / 16);
+
+    curvature_kernel<<<grid, block>>>(d_dem, d_plan, d_profile, rows, cols, cell_size);
+    cudaDeviceSynchronize();
+
+    // copy data back to cpu from GPU
+    cudaMemcpy(plan, d_plan, count * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(profile, d_profile, count * sizeof(float), cudaMemcpyDeviceToHost);
+
+    cudaFree(d_dem);
+    cudaFree(d_plan);
+    cudaFree(d_profile);
+}
