@@ -38,3 +38,30 @@ void curvature_cpu(const float *dem, float *plan, float *profile, int rows, int 
 	}
     }
 }
+
+
+__global__ void curvature_kernel(const float *dem, float *plan, float *profile, int rows, int cols, float cell_size) {
+
+    // thread index calculation
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // check if thread is in bounds
+    if (row >= rows || col >= cols) return;
+
+    // set boarder rows to inf since the filter wont have weights
+    if (row == 0 || row == rows - 1 || col == 0 || col == cols - 1) {
+	plan[row * cols + col] = -9999;
+	profile[row * cols + col] = -9999;
+	return;
+    }   
+
+    float b = dem[(row-1) * cols + col];
+    float d = dem[row * cols + (col-1)];
+    float e = dem[row * cols + col];
+    float f = dem[row * cols + (col+1)];
+    float h = dem[(row+1) * cols + col];
+
+    plan[row * cols + col] = -2 * (d + f - 2*e) / (cell_size * cell_size);
+    profile[row * cols + col] = -2 * (b + h - 2*e) / (cell_size * cell_size);
+}
