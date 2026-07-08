@@ -1,3 +1,4 @@
+#include <cuda_runtime.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -30,11 +31,11 @@ int main(int argc, char *argv[]) {
     }
 
     // Allocate space for arrays
-    float *slope = malloc(dem.valuesRead * sizeof(float));
-    float *aspect = malloc(dem.valuesRead * sizeof(float));
-    float *plan = malloc(dem.valuesRead * sizeof(float));
-    float *profile = malloc(dem.valuesRead * sizeof(float));
-    float *tri = malloc(dem.valuesRead * sizeof(float));
+    float *slope = (float *)malloc(dem.valuesRead * sizeof(float));
+    float *aspect = (float *)malloc(dem.valuesRead * sizeof(float));
+    float *plan = (float *)malloc(dem.valuesRead * sizeof(float));
+    float *profile = (float *)malloc(dem.valuesRead * sizeof(float));
+    float *tri = (float *)malloc(dem.valuesRead * sizeof(float));
 
     if (!slope || !aspect || !plan || !profile || !tri) {
 	fprintf(stderr, "Error: failed to allocate output arrays \n");
@@ -47,9 +48,9 @@ int main(int argc, char *argv[]) {
     cudaEventCreate(&gpu_start);
     cudaEventCreate(&gpu_stop);
 
-    cudaEventRecord(gpu_start);
+    cudaEventRecord(gpu_start, 0);
     run_slope_aspect(dem.data, slope, aspect, rows, cols, cell_size);
-    cudaEventRecord(gpu_stop);
+    cudaEventRecord(gpu_stop, 0);
     cudaEventSynchronize(gpu_stop);
 
     float gpu_time_ms_slope_aspect;
@@ -64,9 +65,9 @@ int main(int argc, char *argv[]) {
 
 
     // curvature
-    cudaEventRecord(gpu_start);
+    cudaEventRecord(gpu_start, 0);
     run_curvature(dem.data, plan, profile, rows, cols, cell_size);
-    cudaEventRecord(gpu_stop);
+    cudaEventRecord(gpu_stop, 0);
     cudaEventSynchronize(gpu_stop);
 
     float gpu_time_ms_curvature;
@@ -80,9 +81,9 @@ int main(int argc, char *argv[]) {
 
 
     // tri
-    cudaEventRecord(gpu_start);
+    cudaEventRecord(gpu_start, 0);
     run_tri(dem.data, tri, rows, cols);
-    cudaEventRecord(gpu_stop);
+    cudaEventRecord(gpu_stop, 0);
     cudaEventSynchronize(gpu_stop);
 
     float gpu_time_ms_tri;

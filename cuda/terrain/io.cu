@@ -22,7 +22,7 @@ RasterData ReadDEM(const char *path) {
     size_t count = file_size / sizeof(float);
 
     // fill buffer with raster data
-    float *buffer = malloc(count * sizeof(float));
+    float *buffer = (float *)malloc(count * sizeof(float));
 
     // reading error check
     size_t elements_read = fread(buffer, sizeof(float), count, file);
