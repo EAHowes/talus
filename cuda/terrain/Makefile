@@ -1,8 +1,8 @@
-CC = nvcc
+CC = /usr/local/bin/nvcc-wrapper
 
 CFLAGS = -I. -lm -arch=sm_61
 
-SRCS = io.c kernels/slope_aspect.cu kernels/curvature.cu kernels/tri.cu main.c
+SRCS = io.cu kernels/slope_aspect.cu kernels/curvature.cu kernels/tri.cu main.cu
 
 all: terrain
 
