@@ -1,6 +1,6 @@
 CC = nvcc
 
-CFLAGS = -I. -lm - arch=sm_61
+CFLAGS = -I. -lm -arch=sm_61
 
 SRCS = io.c kernels/slope_aspect.cu kernels/curvature.cu kernels/tri.cu main.c
 
