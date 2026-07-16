@@ -3,7 +3,7 @@
 
 # Rockfall Hazard Analysis Platform
 
-A distributed system for quantitative pre-trip rockfall hazard assessment on climbing routes. Talus delivers an end-to-end pipeline from raw DEM ingestion to route risk visualization. Freeze-thaw risk windows combined with GPU-identified source zones above a route create actionable information for mitigating rockfall hazards.
+Talus aims to mitigate one of the top causes of death / injury in outdoor rock climbing (rockfall) by providing climbers with concrete rockfall risk scores for their local wall. This is done via an end-to-end pipeline from raw DEM ingestion to route risk visualization. Freeze-thaw risk windows combined with GPU-identified source zones above a route create actionable information for mitigating rockfall hazards.
 
 > The final project will include a CUDA-accelerated Monte Carlo simulation engine that replaces the current proximity-based risk scoring with probabilistic passage probability computed from 10,000 independent trajectory simulations per source zone.
 
