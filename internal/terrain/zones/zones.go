@@ -86,14 +86,81 @@ func findClusters(slope, plan, tri []float32, rows, cols int, slopeThresh, triTh
 }
 
 
+func DetectSourceZones (slopePath, planPath, triPath string, rows, cols int, cellSizeM float64, slopeThresh, triThresh float64, originLon, originLat float64, demTileID, geologyID int) ([]models.SourceZone, error) {
 
+	slope, err := readRaster(slopePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read slope: %w", err)
+	}
 
+	plan, err := readRaster(planPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read plan: %w", err)
+	}
 
+	tri, err := readRaster(triPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read tri: %w", err)
+	}
 
+	clusters := findClusters(slope, plan, tri, rows, cols, slopeThresh, triThresh)
 
+	var zones []models.SourceZone
+	for _, c := range clusters {
+		// small clusters are likely noise
+		if len(c.cells) < 10 {
+			continue
+		}
 
+		// bounding box computation
+		minRow := rows
+		minCol := cols
+		maxRow := 0
+		maxCol := 0
+		var slopeSum float64
 
+		for _, idx := range c.cells {
+			r := idx / cols
+			col := idx % cols
+			if r < minRow {minRow = r}
+			if r > maxRow {maxRow = r}
+			if col < minCol {minCol = col}
+			if col > maxCol {maxCol = col}
+			slopeSum += float64(slope[idx])
+		}
+		meanSlope := slopeSum / float64(len(c.cells))
+		areaMi2 := float64(len(c.cells)) * cellSizeM * cellSizeM
 
+		// bbox to geographic location
+		// 111320 is an approx of how many meters are in 1 degree of latitude or longitude
+		minLon := originLon + float64(minCol)*cellSizeM/111320.0
+		maxLon := originLon + float64(maxCol)*cellSizeM/111320.0
+		maxLat := originLat - float64(minRow)*cellSizeM/111320.0
+		minLat := originLat - float64(maxRow)*cellSizeM/111320.0
 
+		centLon := (minLon + maxLon) / 2
+		centLat := (minLat + maxLat) / 2
 
+		polygon := fmt.Sprintf(
+			"POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))",
+			minLon, minLat,
+			maxLon, minLat,
+			maxLon, maxLat,
+			minLon, maxLat,
+			minLon, minLat,
+		)
 
+		centroid := fmt.Sprintf("POINT(%f %f)", centLon, centLat)
+
+		zones = append(zones, models.SourceZone{
+			DemTileID: demTileID,
+			Geometry: polygon,
+			Centroid: centroid,
+			MeanSlopeDeg: meanSlope,
+			MeanAspectDeg: 0,
+			AreaM2: areaMi2,
+			GeologyID: geologyID,
+		})
+	}
+	return zones, nil
+}
