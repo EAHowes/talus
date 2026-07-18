@@ -7,12 +7,14 @@ import (
 )
 
 type Config struct {
-    PostgresHost     string
-    PostgresPort     int
-    PostgresDB       string
-    PostgresUser     string
-    PostgresPassword string
-    PostgresSSLMode  string
+	PostgresHost     string
+	PostgresPort     int
+	PostgresDB       string
+	PostgresUser     string
+	PostgresPassword string
+	PostgresSSLMode  string
+	LogLevel 	 string
+	S2ListenPort 	 string
 }
 
 func Load() (*Config, error) {
@@ -48,6 +50,16 @@ func Load() (*Config, error) {
     		return nil, fmt.Errorf("POSTGRES_PORT must be a number: %w", err)
 	}
 
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel == "" {
+		logLevel = "info"
+	}
+
+	s2Port := os.Getenv("S2_LISTEN_PORT")
+	if s2Port == "" {
+		return nil, fmt.Errorf("S2_LISTEN_PORT is required but not set")
+	}
+
 	return &Config {
 		PostgresHost:    host,
 		PostgresPort:    port,
@@ -55,5 +67,7 @@ func Load() (*Config, error) {
 		PostgresUser:    user,
 		PostgresPassword:password,
 		PostgresSSLMode: sslmode,
+		LogLevel: 	 logLevel,
+		S2ListenPort: 	 s2Port,
 	}, nil
 }
