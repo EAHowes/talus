@@ -1,6 +1,6 @@
-CC = /usr/local/bin/nvcc-wrapper
+CC = nvcc
 
-CFLAGS = -I. -lm -arch=sm_61
+CFLAGS = -I. -lm -arch=sm_61 --compiler-bindir /usr/bin/gcc-12
 
 SRCS = io.cu kernels/slope_aspect.cu kernels/curvature.cu kernels/tri.cu main.cu
 
