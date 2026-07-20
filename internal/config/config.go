@@ -16,6 +16,7 @@ type Config struct {
 	LogLevel 	 	string
 	S1ListenPort 	 	string
 	S2ListenPort 	 	string
+	S4ListenPort 		string
 	CudaTerrainBinaryPath 	string
 	S2TerrainEndpoint 	string
 	DemStoragePath 		string
@@ -71,6 +72,11 @@ func Load() (*Config, error) {
 	s2Port := os.Getenv("S2_LISTEN_PORT")
 	if s2Port == "" {
 		return nil, fmt.Errorf("S2_LISTEN_PORT is required but not set")
+	}
+
+	s4Port := os.Getenv("S4_LISTEN_PORT")
+	if s4Port == "" {
+		return nil, fmt.Errorf("S4_LISTEN_PORT is required but not set")
 	}
 
 	cudaBinary := os.Getenv("CUDA_TERRAIN_BINARY_PATH")
@@ -138,6 +144,7 @@ func Load() (*Config, error) {
 		LogLevel: 	 	logLevel,
 		S1ListenPort: 	 	s1Port,
 		S2ListenPort: 	 	s2Port,
+		S4ListenPort: 	 	s4Port,
 		CudaTerrainBinaryPath: 	cudaBinary,
 		S2TerrainEndpoint: 	s2Endpoint,
 		DemStoragePath:         demStoragePath,
