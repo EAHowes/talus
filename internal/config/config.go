@@ -14,8 +14,15 @@ type Config struct {
 	PostgresPassword 	string
 	PostgresSSLMode  	string
 	LogLevel 	 	string
+	S1ListenPort 	 	string
 	S2ListenPort 	 	string
 	CudaTerrainBinaryPath 	string
+	S2TerrainEndpoint 	string
+	DemStoragePath 		string
+	TerrainSlopeThreshDeg 	float64
+	TerrainTriThreshold 	float64
+	TerrainTileHaloMeters 	float64
+	TerrainTileMaxCells 	int
 }
 
 func Load() (*Config, error) {
@@ -56,6 +63,11 @@ func Load() (*Config, error) {
 		logLevel = "info"
 	}
 
+	s1Port := os.Getenv("S1_LISTEN_PORT")
+	if s1Port == "" {
+		return nil, fmt.Errorf("S1_LISTEN_PORT is required but not set")
+	}
+
 	s2Port := os.Getenv("S2_LISTEN_PORT")
 	if s2Port == "" {
 		return nil, fmt.Errorf("S2_LISTEN_PORT is required but not set")
@@ -66,6 +78,56 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("CUDA_TERRAIN_BINARY_PATH is required but not set")
 	}
 
+	s2Endpoint := os.Getenv("S2_TERRAIN_ENDPOINT")
+	if s2Endpoint == "" {
+		return nil, fmt.Errorf("S2_TERRAIN_ENDPOINT is required but not set")
+	}
+
+	demStoragePath := os.Getenv("DEM_STORAGE_PATH")
+	if demStoragePath == "" {
+		return nil, fmt.Errorf("DEM_STORAGE_PATH is required but not set")
+	}
+
+	terrainSlopeThreshDeg := os.Getenv("TERRAIN_SLOPE_THRESHOLD_DEG")
+	if terrainSlopeThreshDeg == "" {
+		return nil, fmt.Errorf("TERRAIN_SLOPE_THRESHOLD_DEG is required but not set")
+	}
+
+	terrainTriThreshold := os.Getenv("TERRAIN_TRI_THRESHOLD")
+	if terrainTriThreshold == "" {
+		return nil, fmt.Errorf("TERRAIN_TRI_THRESHOLD is required but not set")
+	}
+
+	terrainTileHaloMeters := os.Getenv("TERRAIN_TILE_HALO_METERS")
+	if terrainTileHaloMeters == "" {
+		return nil, fmt.Errorf("TERRAIN_TILE_HALO_METERS is required but not set")
+	}
+
+	terrainTileMaxCells := os.Getenv("TERRAIN_TILE_MAX_CELLS_PER_SIDE")
+	if terrainTileMaxCells == "" {
+		return nil, fmt.Errorf("TERRAIN_TILE_MAX_CELLS_PER_SIDE is required but not set")
+	}
+
+	slopeThresh, err := strconv.ParseFloat(terrainSlopeThreshDeg, 64)
+	if err != nil {
+		return nil, fmt.Errorf("TERRAIN_SLOPE_THRESH_DEG must be a number: %w", err)
+	}
+
+	triThresh, err := strconv.ParseFloat(terrainTriThreshold, 64)
+	if err != nil {
+		return nil, fmt.Errorf("TERRAIN_TRI_THRESH must be a number: %w", err)
+	}
+
+	haloMeters, err := strconv.ParseFloat(terrainTileHaloMeters, 64)
+	if err != nil {
+		return nil, fmt.Errorf("TERRAIN_TILE_HALO_METERS must be a number: %w", err)
+	}
+
+	maxCells, err := strconv.Atoi(terrainTileMaxCells)
+	if err != nil {
+		return nil, fmt.Errorf("TERRAIN_TILE_MAX_CELLS must be a number: %w", err)
+	}
+
 	return &Config {
 		PostgresHost:    	host,
 		PostgresPort:    	port,
@@ -74,7 +136,14 @@ func Load() (*Config, error) {
 		PostgresPassword: 	password,
 		PostgresSSLMode: 	sslmode,
 		LogLevel: 	 	logLevel,
+		S1ListenPort: 	 	s1Port,
 		S2ListenPort: 	 	s2Port,
 		CudaTerrainBinaryPath: 	cudaBinary,
+		S2TerrainEndpoint: 	s2Endpoint,
+		DemStoragePath:         demStoragePath,
+		TerrainSlopeThreshDeg:  slopeThresh,
+		TerrainTriThreshold:    triThresh,
+		TerrainTileHaloMeters:  haloMeters,
+		TerrainTileMaxCells:    maxCells,
 	}, nil
 }
