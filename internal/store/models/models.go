@@ -93,6 +93,7 @@ type AlertConfig struct {
 	RouteID 		int
 	RiskThreshold 		float64
 	FreezeThawTrigger 	bool
+	WebhookURL 		string
 	Enabled 		bool
 	CreatedAt 		time.Time
 }
