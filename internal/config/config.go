@@ -16,6 +16,7 @@ type Config struct {
 	LogLevel 	 	string
 	S1ListenPort 	 	string
 	S2ListenPort 	 	string
+	S4ListenPort 		string
 	CudaTerrainBinaryPath 	string
 	S2TerrainEndpoint 	string
 	DemStoragePath 		string
@@ -23,6 +24,7 @@ type Config struct {
 	TerrainTriThreshold 	float64
 	TerrainTileHaloMeters 	float64
 	TerrainTileMaxCells 	int
+	ProximityRadiusM 	float64
 }
 
 func Load() (*Config, error) {
@@ -73,6 +75,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("S2_LISTEN_PORT is required but not set")
 	}
 
+	s4Port := os.Getenv("S4_LISTEN_PORT")
+	if s4Port == "" {
+		return nil, fmt.Errorf("S4_LISTEN_PORT is required but not set")
+	}
+
 	cudaBinary := os.Getenv("CUDA_TERRAIN_BINARY_PATH")
 	if cudaBinary == "" {
 		return nil, fmt.Errorf("CUDA_TERRAIN_BINARY_PATH is required but not set")
@@ -108,6 +115,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("TERRAIN_TILE_MAX_CELLS_PER_SIDE is required but not set")
 	}
 
+	proximityRadiusStr := os.Getenv("SOURCE_ZONE_PROXIMITY_RADIUS_M")
+	if proximityRadiusStr == "" {
+		return nil, fmt.Errorf("SOURCE_ZONE_PROXIMITY_RADIUS_M is required but not set")
+	}
+
 	slopeThresh, err := strconv.ParseFloat(terrainSlopeThreshDeg, 64)
 	if err != nil {
 		return nil, fmt.Errorf("TERRAIN_SLOPE_THRESH_DEG must be a number: %w", err)
@@ -128,6 +140,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("TERRAIN_TILE_MAX_CELLS must be a number: %w", err)
 	}
 
+	proximityRadius, err := strconv.ParseFloat(proximityRadiusStr, 64)
+	if err != nil {
+		return nil, fmt.Errorf("SOURCE_ZONE_PROXIMITY_RADIUS_M must be a number: %w", err)
+	}
+
 	return &Config {
 		PostgresHost:    	host,
 		PostgresPort:    	port,
@@ -138,6 +155,7 @@ func Load() (*Config, error) {
 		LogLevel: 	 	logLevel,
 		S1ListenPort: 	 	s1Port,
 		S2ListenPort: 	 	s2Port,
+		S4ListenPort: 	 	s4Port,
 		CudaTerrainBinaryPath: 	cudaBinary,
 		S2TerrainEndpoint: 	s2Endpoint,
 		DemStoragePath:         demStoragePath,
@@ -145,5 +163,6 @@ func Load() (*Config, error) {
 		TerrainTriThreshold:    triThresh,
 		TerrainTileHaloMeters:  haloMeters,
 		TerrainTileMaxCells:    maxCells,
+		ProximityRadiusM:  	proximityRadius,
 	}, nil
 }

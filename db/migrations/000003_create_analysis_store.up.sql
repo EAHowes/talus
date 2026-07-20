@@ -30,6 +30,7 @@ CREATE TABLE alert_configs (
     route_id        INTEGER REFERENCES routes(id),
     risk_threshold  FLOAT NOT NULL,
     freeze_thaw_trigger BOOLEAN DEFAULT TRUE,
+    webhook_url     TEXT NOT NULL DEFAULT '',
     enabled         BOOLEAN DEFAULT TRUE,
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
