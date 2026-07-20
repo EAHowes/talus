@@ -69,7 +69,7 @@ func main() {
 
 	// start an HTTP server to listen to service 1
 	http.HandleFunc("/tile", handleTile(pool, logger, cfg))
-	logger.Info("terrain service lisening", "port", cfg.S2ListenPort)
+	logger.Info("terrain service listening", "port", cfg.S2ListenPort)
 	err = http.ListenAndServe(":"+cfg.S2ListenPort, nil)
 	if err != nil {
 		logger.Error("server failed", "error", err)
