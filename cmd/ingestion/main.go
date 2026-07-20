@@ -80,7 +80,7 @@ func main() {
 	http.HandleFunc("/routes", handleRoutes(pool, logger, cfg))
 	http.HandleFunc("/geology", handleGeology(pool, logger, cfg))
 
-	logger.Info("terrain service lisening", "port", cfg.S1ListenPort)
+	logger.Info("ingestion service lisening", "port", cfg.S1ListenPort)
 	err = http.ListenAndServe(":"+cfg.S1ListenPort, nil)
 	if err != nil {
 		logger.Error("server failed", "error", err)
