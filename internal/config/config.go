@@ -14,8 +14,10 @@ type Config struct {
 	PostgresPassword 	string
 	PostgresSSLMode  	string
 	LogLevel 	 	string
+	S1ListenPort 	 	string
 	S2ListenPort 	 	string
 	CudaTerrainBinaryPath 	string
+	S2TerrainEndpoint 	string
 }
 
 func Load() (*Config, error) {
@@ -56,6 +58,11 @@ func Load() (*Config, error) {
 		logLevel = "info"
 	}
 
+	s1Port := os.Getenv("S1_LISTEN_PORT")
+	if s1Port == "" {
+		return nil, fmt.Errorf("S1_LISTEN_PORT is required but not set")
+	}
+
 	s2Port := os.Getenv("S2_LISTEN_PORT")
 	if s2Port == "" {
 		return nil, fmt.Errorf("S2_LISTEN_PORT is required but not set")
@@ -66,6 +73,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("CUDA_TERRAIN_BINARY_PATH is required but not set")
 	}
 
+	s2Endpoint := os.Getenv("S2_TERRAIN_ENDPOINT")
+	if s2Endpoint == "" {
+		return nil, fmt.Errorf("S2_TERRAIN_ENDPOINT is required but not set")
+	}
+
 	return &Config {
 		PostgresHost:    	host,
 		PostgresPort:    	port,
@@ -74,7 +86,9 @@ func Load() (*Config, error) {
 		PostgresPassword: 	password,
 		PostgresSSLMode: 	sslmode,
 		LogLevel: 	 	logLevel,
+		S1ListenPort: 	 	s1Port,
 		S2ListenPort: 	 	s2Port,
 		CudaTerrainBinaryPath: 	cudaBinary,
+		S2TerrainEndpoint: 	s2Endpoint,
 	}, nil
 }
