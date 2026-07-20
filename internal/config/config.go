@@ -24,6 +24,7 @@ type Config struct {
 	TerrainTriThreshold 	float64
 	TerrainTileHaloMeters 	float64
 	TerrainTileMaxCells 	int
+	ProximityRadiusM 	float64
 }
 
 func Load() (*Config, error) {
@@ -114,6 +115,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("TERRAIN_TILE_MAX_CELLS_PER_SIDE is required but not set")
 	}
 
+	proximityRadiusStr := os.Getenv("SOURCE_ZONE_PROXIMITY_RADIUS_M")
+	if proximityRadiusStr == "" {
+		return nil, fmt.Errorf("SOURCE_ZONE_PROXIMITY_RADIUS_M is required but not set")
+	}
+
 	slopeThresh, err := strconv.ParseFloat(terrainSlopeThreshDeg, 64)
 	if err != nil {
 		return nil, fmt.Errorf("TERRAIN_SLOPE_THRESH_DEG must be a number: %w", err)
@@ -134,6 +140,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("TERRAIN_TILE_MAX_CELLS must be a number: %w", err)
 	}
 
+	proximityRadius, err := strconv.ParseFloat(proximityRadiusStr, 64)
+	if err != nil {
+		return nil, fmt.Errorf("SOURCE_ZONE_PROXIMITY_RADIUS_M must be a number: %w", err)
+	}
+
 	return &Config {
 		PostgresHost:    	host,
 		PostgresPort:    	port,
@@ -152,5 +163,6 @@ func Load() (*Config, error) {
 		TerrainTriThreshold:    triThresh,
 		TerrainTileHaloMeters:  haloMeters,
 		TerrainTileMaxCells:    maxCells,
+		ProximityRadiusM:  	proximityRadius,
 	}, nil
 }
