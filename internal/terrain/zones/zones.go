@@ -6,7 +6,7 @@ import (
 	"math"
 	"os"
 
-	"github.com/eahowes/talus/internal/store/models"
+	"github.com/ethan-howes/talus/internal/store/models"
 )
 
 type cluster struct {

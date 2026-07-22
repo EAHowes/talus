@@ -11,13 +11,13 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/eahowes/talus/internal/hazard/alerts"
-	"github.com/eahowes/talus/internal/hazard/freezethaw"
-	"github.com/eahowes/talus/internal/hazard/proximity"
-	"github.com/eahowes/talus/internal/config"
-	"github.com/eahowes/talus/internal/store"
-	"github.com/eahowes/talus/internal/store/models"
-	"github.com/eahowes/talus/internal/telemetry"
+	"github.com/ethan-howes/talus/internal/hazard/alerts"
+	"github.com/ethan-howes/talus/internal/hazard/freezethaw"
+	"github.com/ethan-howes/talus/internal/hazard/proximity"
+	"github.com/ethan-howes/talus/internal/config"
+	"github.com/ethan-howes/talus/internal/store"
+	"github.com/ethan-howes/talus/internal/store/models"
+	"github.com/ethan-howes/talus/internal/telemetry"
 )
 
 

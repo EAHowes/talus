@@ -1,4 +1,4 @@
-module github.com/eahowes/talus
+module github.com/ethan-howes/talus
 
 go 1.25.10
 
