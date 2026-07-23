@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/eahowes/talus/internal/store/models"
+	"github.com/ethan-howes/talus/internal/store/models"
 )
 
 

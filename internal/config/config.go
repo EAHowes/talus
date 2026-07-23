@@ -17,14 +17,18 @@ type Config struct {
 	S1ListenPort 	 	string
 	S2ListenPort 	 	string
 	S4ListenPort 		string
+	S5ListenPort 		string
 	CudaTerrainBinaryPath 	string
+	S1IngestionEndpoint 	string
 	S2TerrainEndpoint 	string
+	S4HazardEndpoint 	string
 	DemStoragePath 		string
 	TerrainSlopeThreshDeg 	float64
 	TerrainTriThreshold 	float64
 	TerrainTileHaloMeters 	float64
 	TerrainTileMaxCells 	int
 	ProximityRadiusM 	float64
+	WebStaticDir 		string
 }
 
 func Load() (*Config, error) {
@@ -80,14 +84,29 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("S4_LISTEN_PORT is required but not set")
 	}
 
+	s5Port := os.Getenv("S5_LISTEN_PORT")
+	if s5Port == "" {
+		return nil, fmt.Errorf("S5_LISTEN_PORT is required but not set")
+	}
+
 	cudaBinary := os.Getenv("CUDA_TERRAIN_BINARY_PATH")
 	if cudaBinary == "" {
 		return nil, fmt.Errorf("CUDA_TERRAIN_BINARY_PATH is required but not set")
 	}
 
+	s1Endpoint := os.Getenv("S1_INGESTION_ENDPOINT")
+	if s1Endpoint == "" {
+		return nil, fmt.Errorf("S2_INGESTION_ENDPOINT is required but not set")
+	}
+
 	s2Endpoint := os.Getenv("S2_TERRAIN_ENDPOINT")
 	if s2Endpoint == "" {
 		return nil, fmt.Errorf("S2_TERRAIN_ENDPOINT is required but not set")
+	}
+
+	s4Endpoint := os.Getenv("S4_HAZARD_ENDPOINT")
+	if s4Endpoint == "" {
+		return nil, fmt.Errorf("S4_HAZARD_ENDPOINT is required but not set")
 	}
 
 	demStoragePath := os.Getenv("DEM_STORAGE_PATH")
@@ -118,6 +137,11 @@ func Load() (*Config, error) {
 	proximityRadiusStr := os.Getenv("SOURCE_ZONE_PROXIMITY_RADIUS_M")
 	if proximityRadiusStr == "" {
 		return nil, fmt.Errorf("SOURCE_ZONE_PROXIMITY_RADIUS_M is required but not set")
+	}
+
+	webstaticdir := os.Getenv("WEB_STATIC_DIR")
+	if webstaticdir == "" {
+		return nil, fmt.Errorf("WEB_STATIC_DIR is required but not set")
 	}
 
 	slopeThresh, err := strconv.ParseFloat(terrainSlopeThreshDeg, 64)
@@ -156,13 +180,17 @@ func Load() (*Config, error) {
 		S1ListenPort: 	 	s1Port,
 		S2ListenPort: 	 	s2Port,
 		S4ListenPort: 	 	s4Port,
+		S5ListenPort: 	 	s5Port,
 		CudaTerrainBinaryPath: 	cudaBinary,
+		S1IngestionEndpoint: 	s1Endpoint,
 		S2TerrainEndpoint: 	s2Endpoint,
+		S4HazardEndpoint: 	s4Endpoint,
 		DemStoragePath:         demStoragePath,
 		TerrainSlopeThreshDeg:  slopeThresh,
 		TerrainTriThreshold:    triThresh,
 		TerrainTileHaloMeters:  haloMeters,
 		TerrainTileMaxCells:    maxCells,
 		ProximityRadiusM:  	proximityRadius,
+		WebStaticDir: 		webstaticdir,
 	}, nil
 }

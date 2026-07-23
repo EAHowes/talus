@@ -9,7 +9,7 @@ import (
     _ "github.com/golang-migrate/migrate/v4/source/file"
     "github.com/jackc/pgx/v5/pgxpool"
 
-    "github.com/eahowes/talus/internal/config"
+    "github.com/ethan-howes/talus/internal/config"
 )
 
 func Connect(cfg *config.Config) (*pgxpool.Pool, error) {

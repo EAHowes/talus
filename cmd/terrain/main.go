@@ -9,12 +9,12 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/eahowes/talus/internal/config"
-	"github.com/eahowes/talus/internal/store"
-	"github.com/eahowes/talus/internal/store/models"
-	"github.com/eahowes/talus/internal/telemetry"
-	"github.com/eahowes/talus/internal/terrain/subprocess"
-	"github.com/eahowes/talus/internal/terrain/zones"
+	"github.com/ethan-howes/talus/internal/config"
+	"github.com/ethan-howes/talus/internal/store"
+	"github.com/ethan-howes/talus/internal/store/models"
+	"github.com/ethan-howes/talus/internal/telemetry"
+	"github.com/ethan-howes/talus/internal/terrain/subprocess"
+	"github.com/ethan-howes/talus/internal/terrain/zones"
 )
 
 
