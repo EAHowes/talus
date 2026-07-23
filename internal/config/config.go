@@ -17,6 +17,7 @@ type Config struct {
 	S1ListenPort 	 	string
 	S2ListenPort 	 	string
 	S4ListenPort 		string
+	S5ListenPort 		string
 	CudaTerrainBinaryPath 	string
 	S1IngestionEndpoint 	string
 	S2TerrainEndpoint 	string
@@ -27,6 +28,7 @@ type Config struct {
 	TerrainTileHaloMeters 	float64
 	TerrainTileMaxCells 	int
 	ProximityRadiusM 	float64
+	WebStaticDir 		string
 }
 
 func Load() (*Config, error) {
@@ -82,6 +84,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("S4_LISTEN_PORT is required but not set")
 	}
 
+	s5Port := os.Getenv("S5_LISTEN_PORT")
+	if s5Port == "" {
+		return nil, fmt.Errorf("S5_LISTEN_PORT is required but not set")
+	}
+
 	cudaBinary := os.Getenv("CUDA_TERRAIN_BINARY_PATH")
 	if cudaBinary == "" {
 		return nil, fmt.Errorf("CUDA_TERRAIN_BINARY_PATH is required but not set")
@@ -132,6 +139,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("SOURCE_ZONE_PROXIMITY_RADIUS_M is required but not set")
 	}
 
+	webstaticdir := os.Getenv("WEB_STATIC_DIR")
+	if webstaticdir == "" {
+		return nil, fmt.Errorf("WEB_STATIC_DIR is required but not set")
+	}
+
 	slopeThresh, err := strconv.ParseFloat(terrainSlopeThreshDeg, 64)
 	if err != nil {
 		return nil, fmt.Errorf("TERRAIN_SLOPE_THRESH_DEG must be a number: %w", err)
@@ -168,6 +180,7 @@ func Load() (*Config, error) {
 		S1ListenPort: 	 	s1Port,
 		S2ListenPort: 	 	s2Port,
 		S4ListenPort: 	 	s4Port,
+		S5ListenPort: 	 	s5Port,
 		CudaTerrainBinaryPath: 	cudaBinary,
 		S1IngestionEndpoint: 	s1Endpoint,
 		S2TerrainEndpoint: 	s2Endpoint,
@@ -178,5 +191,6 @@ func Load() (*Config, error) {
 		TerrainTileHaloMeters:  haloMeters,
 		TerrainTileMaxCells:    maxCells,
 		ProximityRadiusM:  	proximityRadius,
+		WebStaticDir: 		webstaticdir,
 	}, nil
 }
