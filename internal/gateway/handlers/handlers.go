@@ -196,3 +196,37 @@ func (h *Handlers) HandleGetTerrainMetrics(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(events)
 }
 
+
+func (h *Handlers) HandlePostAlertConfig(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Name 			string 	`json:"name"`
+		RouteID 		int 	`json:"route_id"`
+		RiskThreshold 		float64 `json:"risk_threshold"`
+		FreezeThawTrigger 	bool 	`json:"freeze_thaw_trigger"`
+		WebhookURL 		string 	`json:"webhook_url"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		h.Logger.Error("invalid request body", "error", err)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	var id int
+	err = h.Pool.QueryRow(r.Context(),
+		`INSERT INTO alert_configs (name, route_id, risk_threshold, freeze_thaw_trigger, webhook_url)
+		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		req.Name, req.RouteID, req.RiskThreshold, req.FreezeThawTrigger, req.WebhookURL,
+	).Scan(&id)
+	if err != nil {
+		h.Logger.Error("failed to insert alert config", "error", err)
+		http.Error(w, "database error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"id": 		id,
+		"message": 	"alert config created",
+	})
+}
