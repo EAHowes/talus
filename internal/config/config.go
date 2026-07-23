@@ -20,6 +20,7 @@ type Config struct {
 	CudaTerrainBinaryPath 	string
 	S1IngestionEndpoint 	string
 	S2TerrainEndpoint 	string
+	S4HazardEndpoint 	string
 	DemStoragePath 		string
 	TerrainSlopeThreshDeg 	float64
 	TerrainTriThreshold 	float64
@@ -90,9 +91,15 @@ func Load() (*Config, error) {
 	if s1Endpoint == "" {
 		return nil, fmt.Errorf("S2_INGESTION_ENDPOINT is required but not set")
 	}
+
 	s2Endpoint := os.Getenv("S2_TERRAIN_ENDPOINT")
 	if s2Endpoint == "" {
 		return nil, fmt.Errorf("S2_TERRAIN_ENDPOINT is required but not set")
+	}
+
+	s4Endpoint := os.Getenv("S4_HAZARD_ENDPOINT")
+	if s4Endpoint == "" {
+		return nil, fmt.Errorf("S4_HAZARD_ENDPOINT is required but not set")
 	}
 
 	demStoragePath := os.Getenv("DEM_STORAGE_PATH")
@@ -164,6 +171,7 @@ func Load() (*Config, error) {
 		CudaTerrainBinaryPath: 	cudaBinary,
 		S1IngestionEndpoint: 	s1Endpoint,
 		S2TerrainEndpoint: 	s2Endpoint,
+		S4HazardEndpoint: 	s4Endpoint,
 		DemStoragePath:         demStoragePath,
 		TerrainSlopeThreshDeg:  slopeThresh,
 		TerrainTriThreshold:    triThresh,
