@@ -124,3 +124,37 @@ func (h *Handlers) HandleGetRouteRisk(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)
 }
+
+
+func (h *Handlers) HandleGetFreezeThaw(w http.ResponseWriter, r *http.Request) {
+	rows, err := h.Pool.Query(r.Context(), `SELECT id, source_zone_id, forecast_date, overnight_low_c, sun_exposure_time, freeze_thaw_active, risk_level FROM freeze_thaw_windows`)
+	if err != nil {
+		h.Logger.Error("query failed", "error", err)
+		http.Error(w, "database error", http.StatusInternalServerError)
+		return
+    	}
+    	defer rows.Close()
+
+	var events []map[string]interface{}
+	for rows.Next() {
+		var id, sourceZoneID 	int
+		var forecastDate 	time.Time
+		var overnightLowC 	float64
+		var sunExposureTime 	time.Time
+		var freezeThawActive 	bool
+		var riskLevel 		string
+		rows.Scan(&id, &sourceZoneID, &forecastDate, &overnightLowC, &sunExposureTime, &freezeThawActive, &riskLevel)
+		events = append(events, map[string]interface{}{
+			"id": 			id,
+			"source_zone_id": 	sourceZoneID,
+			"forecast_date": 	forecastDate,
+			"overnight_low_c": 	overnightLowC,
+			"sun_exposure_time": 	sunExposureTime,
+			"freeze_thaw_active": 	freezeThawActive,
+			"risk_level": 		riskLevel,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(events)
+}
