@@ -48,3 +48,16 @@ func (h *Handlers) HandleRoutes(w http.ResponseWriter, r *http.Request) {
 }
 
 
+// /analyze to s4
+func (h *Handlers) HandleAnalyze(w http.ResponseWriter, r *http.Request) {
+	resp, err := http.Post(h.Cfg.S4HazardEndpoint+"/analyze", "application/json", r.Body)
+	if err != nil {
+		h.Logger.Error("service 4 unavailable", "error", err)
+		http.Error(w, "upstream service unavailable", http.StatusBadGateway)
+		return
+	}
+	defer resp.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+}
