@@ -18,6 +18,7 @@ type Config struct {
 	S2ListenPort 	 	string
 	S4ListenPort 		string
 	CudaTerrainBinaryPath 	string
+	S1IngestionEndpoint 	string
 	S2TerrainEndpoint 	string
 	DemStoragePath 		string
 	TerrainSlopeThreshDeg 	float64
@@ -85,6 +86,10 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("CUDA_TERRAIN_BINARY_PATH is required but not set")
 	}
 
+	s1Endpoint := os.Getenv("S1_INGESTION_ENDPOINT")
+	if s1Endpoint == "" {
+		return nil, fmt.Errorf("S2_INGESTION_ENDPOINT is required but not set")
+	}
 	s2Endpoint := os.Getenv("S2_TERRAIN_ENDPOINT")
 	if s2Endpoint == "" {
 		return nil, fmt.Errorf("S2_TERRAIN_ENDPOINT is required but not set")
@@ -157,6 +162,7 @@ func Load() (*Config, error) {
 		S2ListenPort: 	 	s2Port,
 		S4ListenPort: 	 	s4Port,
 		CudaTerrainBinaryPath: 	cudaBinary,
+		S1IngestionEndpoint: 	s1Endpoint,
 		S2TerrainEndpoint: 	s2Endpoint,
 		DemStoragePath:         demStoragePath,
 		TerrainSlopeThreshDeg:  slopeThresh,
