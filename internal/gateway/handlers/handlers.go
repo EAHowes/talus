@@ -94,3 +94,33 @@ func (h *Handlers) HandleGetAlerts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)
 }
+
+
+func (h *Handlers) HandleGetRouteRisk(w http.ResponseWriter, r *http.Request) {
+	rows, err := h.Pool.Query(r.Context(), `SELECT id, route_id, source_zone_id, nearest_source_m, risk_score, assessed_at FROM route_risk_assessments ORDER BY assessed_at DESC`)
+	if err != nil {
+		h.Logger.Error("query failed", "error", err)
+		http.Error(w, "database error", http.StatusInternalServerError)
+		return
+    	}
+    	defer rows.Close()
+
+	var events []map[string]interface{}
+	for rows.Next() {
+		var id, routeID, sourceZoneID int
+		var nearestSourceM, riskScore float64
+		var assessedAt time.Time
+		rows.Scan(&id, &routeID, &sourceZoneID, &nearestSourceM, &riskScore, &assessedAt)
+		events = append(events, map[string]interface{}{
+			"id": 		id,
+			"route_id": 	routeID,
+			"source_zone_id": sourceZoneID,
+			"nearest_source_m": nearestSourceM,
+			"risk_score": 	riskScore,
+			"assessed_at": assessedAt,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(events)
+}
