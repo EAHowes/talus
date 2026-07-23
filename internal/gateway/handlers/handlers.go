@@ -96,6 +96,7 @@ func (h *Handlers) HandleGetAlerts(w http.ResponseWriter, r *http.Request) {
 }
 
 
+// returns json values for route_risk_assessments db
 func (h *Handlers) HandleGetRouteRisk(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.Pool.Query(r.Context(), `SELECT id, route_id, source_zone_id, nearest_source_m, risk_score, assessed_at FROM route_risk_assessments ORDER BY assessed_at DESC`)
 	if err != nil {
@@ -126,6 +127,7 @@ func (h *Handlers) HandleGetRouteRisk(w http.ResponseWriter, r *http.Request) {
 }
 
 
+// returns json values for freeze_thaw_windows db
 func (h *Handlers) HandleGetFreezeThaw(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.Pool.Query(r.Context(), `SELECT id, source_zone_id, forecast_date, overnight_low_c, sun_exposure_time, freeze_thaw_active, risk_level FROM freeze_thaw_windows`)
 	if err != nil {
@@ -158,3 +160,39 @@ func (h *Handlers) HandleGetFreezeThaw(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)
 }
+
+
+// returns json values for terrain_metrics db
+func (h *Handlers) HandleGetTerrainMetrics(w http.ResponseWriter, r *http.Request) {
+	rows, err := h.Pool.Query(r.Context(), `SELECT id, dem_tile_id, kernel_name, cells_processed, gpu_time_ms, cpu_time_ms, throughput_mcps, recorded_at FROM terrain_metrics`)
+	if err != nil {
+		h.Logger.Error("query failed", "error", err)
+		http.Error(w, "database error", http.StatusInternalServerError)
+		return
+    	}
+    	defer rows.Close()
+
+	var events []map[string]interface{}
+	for rows.Next() {
+		var id, demTileID 				int
+		var kernelName 					string
+		var cellsProcessed 				int64
+		var gpuTimeMs, cpuTimeMs, throughputMcps 	float64
+		var recordedAt 					time.Time
+		rows.Scan(&id, &demTileID, &kernelName, &cellsProcessed, &gpuTimeMs, &cpuTimeMs, &throughputMcps, &recordedAt)
+		events = append(events, map[string]interface{}{
+			"id": 			id,
+			"dem_tile_id": 		demTileID,
+			"kernel_name": 		kernelName,
+			"cells_processed": 	cellsProcessed,
+			"gpu_time_ms": 		gpuTimeMs,
+			"cpu_time_ms": 		cpuTimeMs,
+			"throughput_mcps": 	throughputMcps,
+			"recorded_at": 		recordedAt,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(events)
+}
+
